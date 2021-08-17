@@ -14,8 +14,10 @@ public class PlayerController : MonoBehaviour
     public AudioClip crashSound;
     public float jumpForce = 10f;
     public float gravityModifier;
-    public bool isOnGround = true;
+    public int jumpCount = 0;
     public bool gameOver = false;
+    public int jumpCountMax = 2;
+    public bool booster = false;
 
     // Start is called before the first frame update
     void Start()
@@ -30,13 +32,24 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && isOnGround && !gameOver)
+        if (Input.GetKeyDown(KeyCode.Space) && jumpCount++ < jumpCountMax && !gameOver)
         {
             playerRb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            isOnGround = false;
             playerAnim.SetTrigger("Jump_trig");
             dirtParticle.Stop();
             playerAudio.PlayOneShot(jumpSound, 1f);
+        }
+        
+        if (Input.GetKey(KeyCode.Q))
+        {
+            booster = true;
+            playerAnim.SetFloat("Booster_f", 1.5f);
+        }
+
+        if (Input.GetKeyUp(KeyCode.Q))
+        {
+            booster = false;
+            playerAnim.SetFloat("Booster_f", 1.0f);
         }
     }
 
@@ -46,7 +59,7 @@ public class PlayerController : MonoBehaviour
 
         if (other.gameObject.CompareTag("Ground"))
         {
-            isOnGround = true;
+            jumpCount = 0;
             dirtParticle.Play();
         } 
         
@@ -60,6 +73,5 @@ public class PlayerController : MonoBehaviour
             dirtParticle.Stop();
             playerAudio.PlayOneShot(crashSound, 1f);
         }
-        
     }
 }
